@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sign in - SmartReply AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" th:href="@{/css/base.css}" />
+  <link rel="stylesheet" th:href="@{/css/login.css}" />
+</head>
+<body class="login-page">
+
+  <button class="icon-btn theme-toggle-fixed" onclick="SmartReplyTheme.toggleTheme()" title="Toggle theme">
+    <span data-theme-icon>🌙</span>
+  </button>
+
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="mark">S</div>
+      <div class="name">SmartReply AI</div>
+    </div>
+    <div class="login-subtitle">Email productivity &amp; rule-based smart-reply generator</div>
+
+    <div class="login-error" id="login-error"></div>
+
+    <a href="/oauth2/authorization/google" class="btn btn-primary google-signin-btn">
+      <span class="google-g">G</span> Sign in with Google
+    </a>
+
+    <div class="disclaimer">
+      SmartReply AI never sees or stores your Google password - Google itself
+      handles sign-in, and this app only receives a limited-scope access
+      token (to read your Inbox and send mail on your behalf) that you grant
+      on Google's own consent screen. You can revoke access at any time from
+      <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">your Google Account settings</a>.
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script th:src="@{/js/theme.js}"></script>
+  <script th:src="@{/js/api.js}"></script>
+  <script th:src="@{/js/login.js}"></script>
+</body>
+</html>

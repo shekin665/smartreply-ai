@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>SmartReply AI - Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- CSRF protection is on now that this app can send real email through an authenticated
+       session - every non-GET fetch() call in app.js/api.js attaches this token as a header. -->
+  <meta name="_csrf" th:content="${_csrf.token}" />
+  <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+  <link rel="stylesheet" th:href="@{/css/base.css}" />
+  <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="mark">S</div>
+      <span>SmartReply AI</span>
+      <span class="badge badge-urgent" title="Sending/reading uses your real signed-in Gmail account">🔴 Connected to Gmail</span>
+    </div>
+    <div class="topbar-stats">
+      <span>Unread <b id="stat-unread">0</b></span>
+      <span>Replies generated <b id="stat-replies">0</b></span>
+      <span>Time saved <b id="stat-time">0m</b></span>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="SmartReplyTheme.toggleTheme()" title="Toggle theme">
+        <span data-theme-icon>🌙</span>
+      </button>
+      <span class="user-chip" th:text="${displayName}">Signed-in user</span>
+      <button class="btn btn-secondary btn-sm" id="logout-btn">Log out</button>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <button class="btn btn-primary compose-btn" id="compose-btn">+ Compose</button>
+    <ul class="nav-list">
+      <li class="nav-item active" data-folder="INBOX">
+        <span>📥 Inbox</span><span class="nav-count" id="count-INBOX">0</span>
+      </li>
+      <li class="nav-item" data-folder="SENT">
+        <span>📤 Sent</span><span class="nav-count" id="count-SENT">0</span>
+      </li>
+      <li class="nav-item" data-folder="DRAFTS">
+        <span>📝 Drafts</span><span class="nav-count" id="count-DRAFTS">0</span>
+      </li>
+      <li class="nav-item" data-folder="SPAM">
+        <span>🚫 Spam</span><span class="nav-count" id="count-SPAM">0</span>
+      </li>
+      <li class="nav-item" data-folder="ARCHIVE">
+        <span>🗄 Archive</span><span class="nav-count" id="count-ARCHIVE">0</span>
+      </li>
+      <li class="nav-item" data-folder="TRASH">
+        <span>🗑 Trash</span><span class="nav-count" id="count-TRASH">0</span>
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      <button class="btn btn-ghost btn-sm" id="sync-inbox-btn" title="Pulls your most recent real Gmail messages into Inbox (read-only)">📥 Sync real inbox</button>
+      <button class="btn btn-ghost btn-sm" id="reset-demo-btn">↺ Reset demo data</button>
+    </div>
+  </aside>
+
+  <section class="list-pane">
+    <div class="list-pane-header">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search this folder..." />
+      </div>
+    </div>
+    <div class="email-list scrollbar-thin" id="email-list">
+      <div class="empty-state">
+        <div class="emoji">📭</div>
+        <div>Loading...</div>
+      </div>
+    </div>
+  </section>
+
+  <main class="reader-pane scrollbar-thin" id="reader-pane">
+    <div class="empty-state">
+      <div class="emoji">✉️</div>
+      <div>Select an email to read it</div>
+    </div>
+  </main>
+</div>
+
+<!-- Compose / Draft modal -->
+<div class="modal-overlay" id="compose-modal">
+  <div class="modal-card">
+    <h3 class="modal-title" id="compose-modal-title">New message</h3>
+    <form id="compose-form">
+      <input type="hidden" id="compose-id" />
+      <input type="hidden" id="compose-replied-to" />
+      <div class="field">
+        <label for="compose-to">To</label>
+        <input type="text" id="compose-to" placeholder="someone@example.com" />
+        <div class="field-error" id="compose-to-error"></div>
+      </div>
+      <div class="field">
+        <label for="compose-subject">Subject</label>
+        <input type="text" id="compose-subject" placeholder="Subject" />
+        <div class="field-error" id="compose-subject-error"></div>
+      </div>
+      <div class="field">
+        <label for="compose-body">Message</label>
+        <textarea id="compose-body" rows="8" placeholder="Write your message..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="compose-delete-btn" style="display:none;">Delete draft</button>
+        <button type="button" class="btn btn-secondary" id="compose-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-secondary" id="compose-save-draft-btn">Save as draft</button>
+        <button type="submit" class="btn btn-primary" id="compose-send-btn">Send</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Spring Security's /logout endpoint requires POST + a CSRF token - a real form submit
+     handles both correctly (simpler and more robust than faking it with fetch). -->
+<form id="logout-form" method="post" th:action="@{/logout}" style="display:none;">
+  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+</form>
+
+<div id="toast-container"></div>
+
+<script th:src="@{/js/theme.js}"></script>
+<script th:src="@{/js/api.js}"></script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

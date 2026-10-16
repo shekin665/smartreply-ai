@@ -1,0 +1,19 @@
+# Render Blueprint - lets Render auto-configure this service from the repo instead of
+# manually filling in a dashboard form. See README "Deploying to Render" section.
+#
+# GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET are marked `sync: false` on purpose: that tells
+# Render to prompt for the value in its dashboard and store it as an encrypted secret,
+# rather than expecting the value to live in this file (which would mean committing a
+# credential to git).
+services:
+  - type: web
+    name: smartreply-ai
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /login
+    envVars:
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
