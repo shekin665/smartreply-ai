@@ -9,6 +9,7 @@ import com.smartreply.ai.model.SentEmail;
 import com.smartreply.ai.service.mail.InboundMailGateway;
 import com.smartreply.ai.service.mail.OutboundMailGateway;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.annotation.SessionScope;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,8 +32,17 @@ import java.util.stream.Collectors;
  * present (useful for a viva walkthrough without touching any real account);
  * real messages pulled via {@link #syncRealInbox} are simply merged in
  * alongside it, tagged {@code fromRealGmail=true}.
+ * <p>
+ * {@code @SessionScope} is important here, not just an optimization: every
+ * signed-in user now has their own real Gmail OAuth token, so without
+ * per-session isolation a plain singleton would mean ALL logged-in users
+ * share one mailbox - one person's synced Gmail messages (and sent/draft
+ * emails) would be visible to everyone else too. Spring creates one
+ * {@code EmailService} instance per HTTP session instead, matching the
+ * mental model of "each signed-in user sees only their own mailbox".
  */
 @Service
+@SessionScope
 public class EmailService {
 
     private final DemoDataSeeder seeder;

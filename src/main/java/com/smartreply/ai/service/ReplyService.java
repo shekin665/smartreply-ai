@@ -8,6 +8,7 @@ import com.smartreply.ai.model.Tone;
 import com.smartreply.ai.strategy.ReplyStrategy;
 import com.smartreply.ai.strategy.ReplyStrategyFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.annotation.SessionScope;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,8 +22,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * ReplyStrategyFactory are all supplied by Spring through the constructor
  * rather than created with {@code new} inside this class, which keeps
  * ReplyService easy to unit test with fakes/mocks.
+ * <p>
+ * {@code @SessionScope} for the same reason as {@link EmailService}: the
+ * generated-replies list and "time saved" counters are per-user state, not
+ * shared across every signed-in account.
  */
 @Service
+@SessionScope
 public class ReplyService {
 
     /** Rough average seconds a person takes to type a reply by hand - used only for the dashboard's "time saved" stat. */
