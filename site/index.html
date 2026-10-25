@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Reply – AI email reply assistant</title>
+<meta name="description" content="Smart Reply reads an incoming email and drafts a reply in the tone you choose. You review and approve every message before it is sent. B.Tech Information Technology project, Easwari Engineering College, Ramapuram.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="#top" aria-label="Smart Reply home">
+      <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect x="2" y="6" width="28" height="20" rx="3" fill="#10201C"/><path d="M3 8l13 10L29 8" fill="none" stroke="#F3F6F4" stroke-width="2"/></svg>
+      Smart Reply
+    </a>
+    <nav aria-label="Primary">
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#screens">Screens</a>
+      <a href="#build">How it's built</a>
+      <a href="#team">Team</a>
+    </nav>
+    <a class="btn btn-ink" href="https://smartreply-ai-0kx3.onrender.com" target="_blank" rel="noopener">Open the live app</a>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <h1>Answer your email without starting from a blank screen.</h1>
+      <p class="lead">Smart Reply reads an incoming message, works out what the sender is asking and drafts a reply in the tone you pick. You read it, change it if you like, and press send. Nothing leaves your account until you approve it.</p>
+      <div class="cta">
+        <a class="btn btn-ink" href="https://smartreply-ai-0kx3.onrender.com" target="_blank" rel="noopener">Open the live app</a>
+        <a class="btn btn-line" href="assets/SmartReply_Project_Report.pdf" download>Download the project report</a>
+      </div>
+      <p class="note">The live app is hosted on a free plan, so the first load can take up to a minute while it wakes up.</p>
+    </div>
+
+    <div class="airmail" aria-labelledby="demo-h">
+      <div class="airmail-in">
+        <h2 id="demo-h" class="sr">Try the tone selector</h2>
+        <div class="msg">
+          <div class="msg-h"><b>Prof. Meena</b> <span>Project review date</span></div>
+          <p>Could you please confirm whether your team will be ready for the project review on Friday at 10 AM?</p>
+        </div>
+        <div class="tones" role="tablist" aria-label="Reply tone">
+          <button role="tab" aria-selected="true" data-tone="formal">Formal</button>
+          <button role="tab" aria-selected="false" data-tone="friendly">Friendly</button>
+          <button role="tab" aria-selected="false" data-tone="concise">Concise</button>
+        </div>
+        <div class="draft" id="draft" role="tabpanel" aria-live="polite"></div>
+        <div class="draft-actions">
+          <span class="badge">Draft. Not sent</span>
+          <span class="muted">You edit, then you send.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="band">
+  <div class="wrap two">
+    <h2>Most replies are routine, and they still take time.</h2>
+    <div class="prose">
+      <p>People answer the same kinds of mail every day: is the date confirmed, did the document arrive, can we move the call. Quick-reply buttons only offer a few fixed phrases such as "Thank you". Out-of-office auto-responders send the same text to everyone. Neither can answer a specific question.</p>
+      <p>Smart Reply fills the gap between those and writing every message by hand. It reads the actual message and drafts a complete answer, and it leaves the final decision to you.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="sec">
+  <div class="wrap">
+    <h2 class="sec-h">How it works</h2>
+    <ol class="steps">
+      <li>
+        <h3>Sign in and connect your mailbox</h3>
+        <p>You grant limited access through Google's own consent screen. The app never sees your password and you can revoke access at any time.</p>
+      </li>
+      <li>
+        <h3>Pick a message and a tone</h3>
+        <p>Your recent mail appears on the dashboard. Newsletters and no-reply senders are marked as not suitable, so you only see messages worth answering.</p>
+      </li>
+      <li>
+        <h3>Review the draft</h3>
+        <p>The draft opens next to the original email. Edit the text, choose another tone, or regenerate it.</p>
+      </li>
+      <li>
+        <h3>Approve and send</h3>
+        <p>Pressing send is the only action that sends mail. The reply is recorded in your history with its status.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="sec sec-tint">
+  <div class="wrap">
+    <h2 class="sec-h">What it does</h2>
+    <dl class="feat">
+      <div><dt>Context-aware drafts</dt><dd>Replies are built from the latest message and a short summary of the thread, so old quoted text is not mistaken for the new question.</dd></div>
+      <div><dt>Tone control</dt><dd>Choose formal, friendly or concise. Add a one-line instruction such as "decline politely and suggest next week" and regenerate.</dd></div>
+      <div><dt>You stay in control</dt><dd>Every draft is editable and nothing is sent without your approval. This is the rule the whole project is designed around.</dd></div>
+      <div><dt>Inbox filtering</dt><dd>Automated mail, newsletters and no-reply addresses are detected and excluded from reply generation.</dd></div>
+      <div><dt>Reply history</dt><dd>Generated, sent and discarded replies are listed with their date and status, so you can find any reply later.</dd></div>
+      <div><dt>Usage dashboard</dt><dd>See how many messages were processed, how many replies were generated and sent, and the time saved.</dd></div>
+      <div><dt>Safe sign-in</dt><dd>Sign-in goes through Google OAuth 2.0 with limited permissions: read the inbox and send mail. Nothing else is requested.</dd></div>
+      <div><dt>No invented facts</dt><dd>Drafts only reuse what the original email says. The engine never adds a date, price or promise the sender did not mention.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- SCREENS -->
+<section id="screens" class="sec">
+  <div class="wrap">
+    <h2 class="sec-h">The screens</h2>
+    <p class="sec-sub">Interface previews of the six main pages designed in the project report. The live app signs in with Google instead of a password form.</p>
+    <div class="viewer">
+      <div class="vtabs" role="tablist" aria-label="Screens">
+        <button role="tab" aria-selected="true" data-img="home">Home</button>
+        <button role="tab" aria-selected="false" data-img="login">Login</button>
+        <button role="tab" aria-selected="false" data-img="dashboard">Dashboard</button>
+        <button role="tab" aria-selected="false" data-img="composer">Reply composer</button>
+        <button role="tab" aria-selected="false" data-img="history">History</button>
+        <button role="tab" aria-selected="false" data-img="settings">Settings</button>
+      </div>
+      <figure class="frame">
+        <div class="frame-bar"><i></i><i></i><i></i></div>
+        <img id="shot" src="assets/home.jpg" width="1440" height="815" alt="Smart Reply home page with a headline, a sample email and its drafted reply">
+        <figcaption id="cap">The home page explains the service in three steps and leads to sign-in.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- BUILD -->
+<section id="build" class="sec sec-tint">
+  <div class="wrap">
+    <h2 class="sec-h">How it's built</h2>
+    <div class="build">
+      <figure class="arch">
+        <svg viewBox="0 0 520 400" role="img" aria-labelledby="arch-t arch-d">
+          <title id="arch-t">Architecture of Smart Reply</title>
+          <desc id="arch-d">A browser talks to a Spring Boot server over HTTPS. The server calls the Gmail API using the user's OAuth 2.0 token.</desc>
+          <defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#10201C"/></marker></defs>
+          <g font-family="IBM Plex Sans, system-ui, sans-serif" font-size="14" fill="#10201C">
+            <rect x="20" y="20" width="480" height="84" rx="8" fill="#fff" stroke="#10201C" stroke-width="1.5"/>
+            <text x="38" y="46" font-weight="600">Browser</text>
+            <text x="38" y="70" fill="#4a5a55">Home, login, dashboard, composer, history, settings</text>
+            <text x="38" y="90" fill="#4a5a55">HTML, CSS, JavaScript calling the REST API</text>
+
+            <rect x="20" y="150" width="480" height="116" rx="8" fill="#fff" stroke="#10201C" stroke-width="1.5"/>
+            <text x="38" y="176" font-weight="600">Spring Boot server (Java 17)</text>
+            <rect x="38" y="190" width="132" height="56" rx="6" fill="#E9EFEC"/><text x="50" y="214" font-size="13">Security</text><text x="50" y="232" font-size="12" fill="#4a5a55">Google sign-in, CSRF</text>
+            <rect x="184" y="190" width="132" height="56" rx="6" fill="#E9EFEC"/><text x="196" y="214" font-size="13">Controllers</text><text x="196" y="232" font-size="12" fill="#4a5a55">Emails, replies</text>
+            <rect x="330" y="190" width="152" height="56" rx="6" fill="#E9EFEC"/><text x="342" y="214" font-size="13">Reply engine</text><text x="342" y="232" font-size="12" fill="#4a5a55">One strategy per tone</text>
+
+            <rect x="20" y="312" width="480" height="68" rx="8" fill="#fff" stroke="#10201C" stroke-width="1.5"/>
+            <text x="38" y="338" font-weight="600">Gmail API</text>
+            <text x="38" y="360" fill="#4a5a55">Reads the inbox and sends approved replies</text>
+
+            <path d="M260 104V150" stroke="#10201C" stroke-width="1.5" marker-end="url(#ar)"/>
+            <text x="270" y="132" font-size="12" fill="#4a5a55">HTTPS, JSON</text>
+            <path d="M260 266V312" stroke="#10201C" stroke-width="1.5" marker-end="url(#ar)"/>
+            <text x="270" y="294" font-size="12" fill="#4a5a55">OAuth 2.0</text>
+          </g>
+        </svg>
+      </figure>
+
+      <div class="build-text">
+        <h3>Technology</h3>
+        <table class="tech">
+          <tbody>
+            <tr><th scope="row">Interface</th><td>HTML5, CSS3, JavaScript, Thymeleaf</td></tr>
+            <tr><th scope="row">Server</th><td>Java 17, Spring Boot, Spring MVC</td></tr>
+            <tr><th scope="row">Security</th><td>Spring Security with Google OAuth 2.0, CSRF protection</td></tr>
+            <tr><th scope="row">Mail</th><td>Gmail REST API, read inbox and send</td></tr>
+            <tr><th scope="row">Build and test</th><td>Maven, JUnit, Postman, Git</td></tr>
+            <tr><th scope="row">Hosting</th><td>Docker on Render</td></tr>
+          </tbody>
+        </table>
+        <h3>What was tested</h3>
+        <ul class="tests">
+          <li>Registration and sign-in with valid and invalid input</li>
+          <li>Private pages refuse requests that are not signed in</li>
+          <li>No-reply and bulk mail is marked not suitable for a reply</li>
+          <li>Regenerating with an instruction produces a new draft</li>
+          <li>An approved reply is sent and saved with the status Sent</li>
+          <li>A friendly error appears when the mail service is unreachable</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REPORT + TEAM -->
+<section id="team" class="sec">
+  <div class="wrap team">
+    <div>
+      <h2 class="sec-h">The people behind it</h2>
+      <p class="sec-sub">B.Tech Information Technology, course 2321CSC304R Object Oriented Programming using Java. Easwari Engineering College, Ramapuram (Autonomous), Anna University, Chennai. November–December 2026.</p>
+      <ul class="people">
+        <li><b>Ram Kumar</b><span>Developer</span></li>
+        <li><b>Sam Rohith</b><span>Developer</span></li>
+        <li><b>Mrs. S. Saranya, M.E., (Ph.D.)</b><span>Supervisor, Assistant Professor, Department of Information Technology</span></li>
+        <li><b>Dr. N. Ananthi, M.E., Ph.D.</b><span>Head of the Department, Information Technology</span></li>
+      </ul>
+    </div>
+    <aside class="report" aria-labelledby="rep-h">
+      <h3 id="rep-h">Read the full report</h3>
+      <p>The report covers the literature review, system analysis, module design, test cases and future work. 54 pages.</p>
+      <a class="btn btn-ink" href="assets/SmartReply_Project_Report.pdf" download>Download the PDF</a>
+      <a class="btn btn-line" href="https://smartreply-ai-0kx3.onrender.com" target="_blank" rel="noopener">Open the live app</a>
+    </aside>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <span>Smart Reply, a student project at Easwari Engineering College, Ramapuram.</span>
+    <a href="#top">Back to top</a>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
