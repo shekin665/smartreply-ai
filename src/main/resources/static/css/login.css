@@ -104,7 +104,7 @@
   line-height: 1.5;
 }
 
-/* Neon background (dark theme): glowing green waves that pulse and drift gently. */
+/* Neon background (dark theme): glowing pink envelopes that pulse and drift gently. */
 [data-theme="dark"] .login-page { background: #050508; }
 [data-theme="dark"] .login-page::before {
   content: "";
