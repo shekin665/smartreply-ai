@@ -56,6 +56,7 @@ async function init() {
   wirePriorityKeywords();
   wireMailGenerator();
   await Promise.all([loadMailOptions(), loadPriorityKeywords()]);
+  genEl("assist-compose").appendChild(buildAssistBar(() => composeBodyInput.value, (t) => { composeBodyInput.value = t; }));
   await Promise.all([loadStats(), loadList()]);
 }
 
@@ -724,6 +725,9 @@ function buildReplyPanel(email) {
   });
   panel.appendChild(enhanceRow);
   panel.appendChild(replyActions);
+  const replyAssist = buildAssistBar(() => textarea.value, (t) => { textarea.value = t; });
+  replyAssist.style.display = "none";
+  panel.appendChild(replyAssist);
 
   let lastGenerated = "";
   const replyEdited = () => textarea.style.display !== "none" && textarea.value !== lastGenerated;
@@ -760,6 +764,7 @@ function buildReplyPanel(email) {
       textarea.style.display = "block";
       replyActions.style.display = "flex";
       enhanceRow.style.display = "flex";
+      replyAssist.style.display = "flex";
       await loadStats();
     } catch (err) {
       showToast(err.message, "error");
@@ -1007,6 +1012,78 @@ async function runMailGenerator() {
     btn.disabled = false;
     btn.textContent = "✨ Generate mail";
   }
+}
+
+/**
+ * "Improve / translate my own text": a small bar under a text box. The AI service rewrites what the user
+ * typed (fixing mistakes, or changing the style) and can translate it; names and links are left alone.
+ */
+function buildAssistBar(getText, setText) {
+  const bar = document.createElement("div");
+  bar.className = "assist-bar";
+
+  const label = document.createElement("span");
+  label.className = "chip-label";
+  label.textContent = "✨ Improve my own text:";
+
+  const style = document.createElement("select");
+  style.setAttribute("aria-label", "Style");
+  fillSelect(style, [
+    { value: "", label: "Keep my style (fix mistakes)" },
+    { value: "FORMAL", label: "More formal" },
+    { value: "FRIENDLY", label: "Friendlier" },
+    { value: "CONCISE", label: "Shorter" },
+    { value: "DETAILED", label: "More detailed" },
+  ]);
+
+  const lang = document.createElement("select");
+  lang.setAttribute("aria-label", "Translate to");
+  fillSelect(lang, [{ value: "", label: "Keep its language" }].concat(
+    state.languages.map((l) => ({ value: l.value, label: "Translate to " + l.label }))));
+
+  const go = document.createElement("button");
+  go.type = "button";
+  go.className = "btn btn-secondary btn-sm";
+  go.textContent = "Improve / translate";
+
+  const undo = document.createElement("button");
+  undo.type = "button";
+  undo.className = "btn btn-ghost btn-sm";
+  undo.textContent = "↩ Undo";
+  undo.style.display = "none";
+
+  let previous = null;
+  go.addEventListener("click", async () => {
+    const text = getText();
+    if (!text.trim()) { showToast("Type or generate some text first.", "error"); return; }
+    if (!style.value && !lang.value) { showToast("Pick a style or a language first.", "error"); return; }
+    go.disabled = true;
+    go.textContent = "Working...";
+    try {
+      const res = await api.post("/api/mail/assist", {
+        text: text,
+        style: style.value || null,
+        language: lang.value || null,
+      });
+      previous = text;
+      setText(res.text);
+      undo.style.display = "inline-flex";
+    } catch (err) {
+      showToast(err.message, "error");
+    } finally {
+      go.disabled = false;
+      go.textContent = "Improve / translate";
+    }
+  });
+  undo.addEventListener("click", () => {
+    if (previous === null) return;
+    setText(previous);
+    previous = null;
+    undo.style.display = "none";
+  });
+
+  bar.append(label, style, lang, go, undo);
+  return bar;
 }
 
 function wireMailGenerator() {

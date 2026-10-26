@@ -563,3 +563,6 @@
 .reply-options .lang-select { flex: 0 0 auto; max-width: 100%; }
 .reply-options input { flex: 1 1 200px; min-width: 0; }
 @media (max-width: 560px) { .mailgen-grid { grid-template-columns: 1fr; } }
+
+.assist-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.assist-bar select { max-width: 100%; }

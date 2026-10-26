@@ -1,10 +1,12 @@
 package com.smartreply.ai.controller;
 
 import com.smartreply.ai.dto.MailGenerateRequest;
+import com.smartreply.ai.dto.TextAssistRequest;
 import com.smartreply.ai.model.Language;
 import com.smartreply.ai.model.MailKind;
 import com.smartreply.ai.service.MailGeneratorService;
 import com.smartreply.ai.service.MailGeneratorService.GeneratedMail;
+import com.smartreply.ai.service.TextAssistService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -26,9 +28,11 @@ public class MailGeneratorController {
     public record Option(String value, String label) { }
 
     private final MailGeneratorService mailGeneratorService;
+    private final TextAssistService textAssistService;
 
-    public MailGeneratorController(MailGeneratorService mailGeneratorService) {
+    public MailGeneratorController(MailGeneratorService mailGeneratorService, TextAssistService textAssistService) {
         this.mailGeneratorService = mailGeneratorService;
+        this.textAssistService = textAssistService;
     }
 
     @PostMapping("/generate")
@@ -37,10 +41,17 @@ public class MailGeneratorController {
         return mailGeneratorService.generate(request, ReplyController.senderName(user));
     }
 
+    /** Improves and/or translates text the user typed themselves (needs the AI key on the server). */
+    @PostMapping("/assist")
+    public Map<String, String> assist(@Valid @RequestBody TextAssistRequest request) {
+        return Map.of("text", textAssistService.assist(request.getText(), request.getLanguage(), request.getStyle()));
+    }
+
     @GetMapping("/options")
-    public Map<String, List<Option>> options() {
+    public Map<String, Object> options() {
         return Map.of(
                 "languages", Arrays.stream(Language.values()).map(l -> new Option(l.name(), l.getLabel())).toList(),
-                "kinds", Arrays.stream(MailKind.values()).map(k -> new Option(k.name(), k.getLabel())).toList());
+                "kinds", Arrays.stream(MailKind.values()).map(k -> new Option(k.name(), k.getLabel())).toList(),
+                "assistAvailable", textAssistService.isConfigured());
     }
 }
