@@ -104,7 +104,7 @@
   line-height: 1.5;
 }
 
-/* Neon envelope background (dark theme). The image is a violet neon envelope with sparkles; it pulses gently. */
+/* Neon background (dark theme): glowing green waves that pulse and drift gently. */
 [data-theme="dark"] .login-page { background: #050508; }
 [data-theme="dark"] .login-page::before {
   content: "";
@@ -112,12 +112,12 @@
   inset: 0;
   z-index: 0;
   background: url("../img/bg-neon.jpg") center / cover no-repeat;
-  animation: neon-pulse 5s ease-in-out infinite;
+  animation: neon-pulse 6s ease-in-out infinite;
   pointer-events: none;
 }
 @keyframes neon-pulse {
-  0%, 100% { opacity: .75; filter: brightness(.9) saturate(1); }
-  50% { opacity: 1; filter: brightness(1.2) saturate(1.15); }
+  0%, 100% { opacity: .75; filter: brightness(.9); transform: scale(1.04) translateX(-1.5%); }
+  50% { opacity: 1; filter: brightness(1.2); transform: scale(1.04) translateX(1.5%); }
 }
 .login-card { position: relative; z-index: 1; }
 .theme-toggle-fixed { z-index: 2; }
