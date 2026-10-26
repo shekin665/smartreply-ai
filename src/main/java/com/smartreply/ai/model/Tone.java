@@ -1,7 +1,7 @@
 package com.smartreply.ai.model;
 
 /**
- * The five reply tones supported by the simulated AI engine.
+ * The reply tones supported by the simulated AI engine.
  * Each value corresponds to exactly one ReplyStrategy implementation.
  */
 public enum Tone {
@@ -9,7 +9,8 @@ public enum Tone {
     FRIENDLY("Friendly"),
     FORMAL("Formal"),
     CONCISE("Concise"),
-    APOLOGETIC("Apologetic");
+    APOLOGETIC("Apologetic"),
+    DETAILED("Detailed");
 
     private final String label;
 

@@ -430,3 +430,11 @@ Each signed-in user can save up to 20 personal keywords or short phrases (for ex
   other's keywords), `controller/PriorityKeywordController` (`/api/priority-keywords`), and
   `PriorityKeywordServiceTest`. The list is also saved in the browser (per Google account) and restored
   on the next visit, because the app has no database.
+
+## Mail generator, enhance options and languages
+
+- **Compose → Mail generator.** Choose the type of mail (invitation, reminder, meeting request), then enter the event title, date, time, venue and a few key points. The app writes the subject and message. Nothing is sent until you press Send.
+- **Not quite right?** The chips (More formal, Friendlier, Shorter, More detailed) rewrite the mail in that style. The reply generator has the same chips, plus "Add an apology" and a box for a line of your own.
+- **Languages.** English, Tamil, Hindi, Telugu, Malayalam, French, Spanish and German, in both the mail generator and the reply generator. The fixed wording lives in `src/main/resources/i18n/phrases_<code>.properties`; add a language with one new file and one line in `Language.java`. `PhraseBookTest` checks that no language is missing a line.
+- The engine is rule-based, not an AI translator. Text you typed (titles, key points, quoted action items) is copied as written. Have a native speaker review the wording before formal use.
+- Replies are signed with the signed-in user's name.

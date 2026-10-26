@@ -6,6 +6,8 @@ import com.smartreply.ai.dto.ReplyUpdateRequest;
 import com.smartreply.ai.model.Reply;
 import com.smartreply.ai.service.ReplyService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -24,9 +26,20 @@ public class ReplyController {
     }
 
     @PostMapping("/generate")
-    public ReplyDto generate(@Valid @RequestBody ReplyGenerateRequest request) {
-        Reply reply = replyService.generate(request.getEmailId(), request.getTone());
+    public ReplyDto generate(@Valid @RequestBody ReplyGenerateRequest request,
+                             @AuthenticationPrincipal OAuth2User user) {
+        Reply reply = replyService.generate(request.getEmailId(), request.getTone(), request.getLanguage(),
+                request.getExtraNote(), senderName(user));
         return ReplyDto.from(reply);
+    }
+
+    /** The signed-in user's name for the signature, or null when there is none (then the demo name is used). */
+    public static String senderName(OAuth2User user) {
+        if (user == null) {
+            return null;
+        }
+        Object name = user.getAttributes().get("name");
+        return name == null ? null : name.toString();
     }
 
     @GetMapping("/{id}")

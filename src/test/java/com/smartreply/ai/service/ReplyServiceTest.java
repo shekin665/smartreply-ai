@@ -3,7 +3,9 @@ package com.smartreply.ai.service;
 import com.smartreply.ai.config.DemoDataSeeder;
 import com.smartreply.ai.exception.ReplyNotFoundException;
 import com.smartreply.ai.model.Email;
+import com.smartreply.ai.i18n.PhraseBook;
 import com.smartreply.ai.model.Folder;
+import com.smartreply.ai.model.Language;
 import com.smartreply.ai.model.Reply;
 import com.smartreply.ai.model.Tone;
 import com.smartreply.ai.strategy.*;
@@ -32,9 +34,11 @@ class ReplyServiceTest {
                 new FriendlyReplyStrategy(),
                 new FormalReplyStrategy(),
                 new ConciseReplyStrategy(),
-                new ApologeticReplyStrategy()
+                new ApologeticReplyStrategy(),
+                new DetailedReplyStrategy()
         ));
-        replyService = new ReplyService(emailService, keywordService, factory);
+        replyService = new ReplyService(emailService, keywordService, factory,
+                new LocalizedReplyComposer(new PhraseBook()));
     }
 
     @Test
@@ -80,5 +84,41 @@ class ReplyServiceTest {
     @Test
     void getByIdThrowsForUnknownReply() {
         assertThrows(ReplyNotFoundException.class, () -> replyService.getById("missing"));
+    }
+
+    @Test
+    void signatureUsesTheSignedInNameAndKeepsTheDemoNameOtherwise() {
+        Email email = emailService.getByFolder(Folder.INBOX).get(0);
+        String named = replyService.generate(email.getId(), Tone.FORMAL, Language.ENGLISH, null, "Shekin").getContent();
+        assertTrue(named.endsWith("Shekin"));
+        assertFalse(named.contains("Demo User"));
+        assertTrue(replyService.generate(email.getId(), Tone.FORMAL).getContent().endsWith("SmartReply AI (Demo User)"));
+    }
+
+    @Test
+    void extraNoteSitsJustBeforeTheClosing() {
+        Email email = emailService.getByFolder(Folder.INBOX).get(0);
+        for (Language language : new Language[]{Language.ENGLISH, Language.TAMIL}) {
+            String content = replyService.generate(email.getId(), Tone.FRIENDLY, language, "See you at 5.", "Shekin").getContent();
+            String[] parts = content.split("\n\n");
+            assertEquals("See you at 5.", parts[parts.length - 2]);
+            assertTrue(parts[parts.length - 1].endsWith("Shekin"));
+        }
+    }
+
+    @Test
+    void otherLanguagesUseTheirOwnWordingAndRecordTheLanguage() {
+        Email email = emailService.getByFolder(Folder.INBOX).get(0);
+        Reply tamil = replyService.generate(email.getId(), Tone.FORMAL, Language.TAMIL, null, null);
+        assertEquals(Language.TAMIL, tamil.getLanguage());
+        assertFalse(tamil.getContent().contains("Dear"));
+        assertTrue(tamil.getContent().contains("வணக்கம்") || tamil.getContent().contains("அன்புள்ள"));
+        Reply french = replyService.generate(email.getId(), Tone.APOLOGETIC, Language.FRENCH, null, null);
+        assertTrue(french.getContent().contains("excuses") || french.getContent().contains("excuser"));
+        for (Language language : Language.values()) {
+            for (Tone tone : Tone.values()) {
+                assertFalse(replyService.generate(email.getId(), tone, language, null, null).getContent().isBlank());
+            }
+        }
     }
 }

@@ -1,7 +1,7 @@
 SmartReplyTheme.initTheme();
 
 const FOLDERS = ["INBOX", "SENT", "DRAFTS", "SPAM", "ARCHIVE", "TRASH"];
-const TONES = ["PROFESSIONAL", "FRIENDLY", "FORMAL", "CONCISE", "APOLOGETIC"];
+const TONES = ["PROFESSIONAL", "FRIENDLY", "FORMAL", "CONCISE", "APOLOGETIC", "DETAILED"];
 
 const state = {
   folder: "INBOX",
@@ -11,6 +11,8 @@ const state = {
   selectedEmail: null,
   currentReply: null,
   selectedTone: "PROFESSIONAL",
+  selectedLanguage: "ENGLISH",
+  languages: [{ value: "ENGLISH", label: "English" }],
   keywords: [],
   priorityOnly: false,
   userEmail: "",
@@ -52,7 +54,8 @@ async function init() {
   wireResetDemo();
   wireSyncInbox();
   wirePriorityKeywords();
-  await loadPriorityKeywords();
+  wireMailGenerator();
+  await Promise.all([loadMailOptions(), loadPriorityKeywords()]);
   await Promise.all([loadStats(), loadList()]);
 }
 
@@ -630,7 +633,7 @@ function buildReplyPanel(email) {
 
   const title = document.createElement("div");
   title.className = "panel-title";
-  title.textContent = "Simulated AI Reply Generator";
+  title.textContent = "Smart Reply Generator";
   panel.appendChild(title);
 
   const toneRow = document.createElement("div");
@@ -639,15 +642,26 @@ function buildReplyPanel(email) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "tone-btn" + (tone === state.selectedTone ? " active" : "");
+    btn.dataset.tone = tone;
     btn.textContent = tone.charAt(0) + tone.slice(1).toLowerCase();
-    btn.addEventListener("click", () => {
-      state.selectedTone = tone;
-      toneRow.querySelectorAll(".tone-btn").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-    });
+    btn.addEventListener("click", () => setTone(tone));
     toneRow.appendChild(btn);
   });
   panel.appendChild(toneRow);
+
+  const optionRow = document.createElement("div");
+  optionRow.className = "reply-options";
+  const langSelect = document.createElement("select");
+  langSelect.className = "lang-select";
+  langSelect.setAttribute("aria-label", "Reply language");
+  fillSelect(langSelect, state.languages, state.selectedLanguage);
+  const noteInput = document.createElement("input");
+  noteInput.type = "text";
+  noteInput.maxLength = 300;
+  noteInput.placeholder = "Add a line of your own (optional)";
+  noteInput.setAttribute("aria-label", "Your own line");
+  optionRow.append(langSelect, noteInput);
+  panel.appendChild(optionRow);
 
   const generateBtn = document.createElement("button");
   generateBtn.type = "button";
@@ -687,17 +701,65 @@ function buildReplyPanel(email) {
   });
 
   replyActions.append(copyBtn, saveEditsBtn, draftBtn, sendBtn);
+
+  const enhanceRow = document.createElement("div");
+  enhanceRow.className = "chip-row";
+  enhanceRow.style.display = "none";
+  const enhanceLabel = document.createElement("span");
+  enhanceLabel.className = "chip-label";
+  enhanceLabel.textContent = "Not quite right?";
+  enhanceRow.appendChild(enhanceLabel);
+  [["More formal", "FORMAL"], ["Friendlier", "FRIENDLY"], ["Shorter", "CONCISE"],
+   ["More detailed", "DETAILED"], ["Add an apology", "APOLOGETIC"]].forEach(([label, tone]) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.textContent = label;
+    chip.addEventListener("click", async () => {
+      if (replyEdited() && !confirm("Replace the reply you edited with a new version?")) return;
+      setTone(tone);
+      await runGenerate();
+    });
+    enhanceRow.appendChild(chip);
+  });
+  panel.appendChild(enhanceRow);
   panel.appendChild(replyActions);
 
-  generateBtn.addEventListener("click", async () => {
+  let lastGenerated = "";
+  const replyEdited = () => textarea.style.display !== "none" && textarea.value !== lastGenerated;
+  const setTone = (tone) => {
+    state.selectedTone = tone;
+    toneRow.querySelectorAll(".tone-btn").forEach((b) => {
+      b.classList.toggle("active", b.dataset.tone === tone);
+    });
+  };
+  langSelect.addEventListener("change", async () => {
+    state.selectedLanguage = langSelect.value;
+    if (textarea.style.display === "none") return;
+    if (replyEdited() && !confirm("Rewrite the reply in this language? Your edits will be replaced.")) {
+      langSelect.value = state.currentReply ? state.currentReply.language : "ENGLISH";
+      state.selectedLanguage = langSelect.value;
+      return;
+    }
+    await runGenerate();
+  });
+
+  async function runGenerate() {
     generateBtn.disabled = true;
     generateBtn.textContent = "Generating...";
     try {
-      const reply = await api.post("/api/replies/generate", { emailId: email.id, tone: state.selectedTone });
+      const reply = await api.post("/api/replies/generate", {
+        emailId: email.id,
+        tone: state.selectedTone,
+        language: state.selectedLanguage,
+        extraNote: noteInput.value.trim() || null,
+      });
       state.currentReply = reply;
+      lastGenerated = reply.content;
       textarea.value = reply.content;
       textarea.style.display = "block";
       replyActions.style.display = "flex";
+      enhanceRow.style.display = "flex";
       await loadStats();
     } catch (err) {
       showToast(err.message, "error");
@@ -705,7 +767,8 @@ function buildReplyPanel(email) {
       generateBtn.disabled = false;
       generateBtn.textContent = "✨ Generate Reply";
     }
-  });
+  }
+  generateBtn.addEventListener("click", runGenerate);
 
   return panel;
 }
@@ -733,7 +796,7 @@ async function saveReplyAsEmail(originalEmail, content, send) {
   };
   try {
     await api.post(send ? "/api/emails/send" : "/api/emails/draft", payload);
-    showToast(send ? "Reply sent (simulated - no real email is sent)." : "Reply saved as draft.", "success");
+    showToast(send ? "Reply sent." : "Reply saved as draft.", "success");
     await Promise.all([loadList(), loadStats()]);
   } catch (err) {
     showToast(err.message, "error");
@@ -779,6 +842,7 @@ function wireCompose() {
 }
 
 function openCompose(draft) {
+  resetMailGenerator(!draft);
   document.getElementById("compose-modal-title").textContent = draft ? "Edit draft" : "New message";
   composeIdInput.value = draft ? draft.id : "";
   composeRepliedToInput.value = "";
@@ -802,6 +866,7 @@ async function openComposeForDraft(id) {
 function closeCompose() {
   composeModal.classList.remove("open");
   composeForm.reset();
+  resetMailGenerator(true);
 }
 
 function clearComposeErrors() {
@@ -837,10 +902,124 @@ async function submitCompose(send) {
     await api.post(send ? "/api/emails/send" : "/api/emails/draft", payload);
     closeCompose();
     await Promise.all([loadList(), loadStats()]);
-    showToast(send ? "Email sent (simulated - no real email is sent)." : "Draft saved.", "success");
+    showToast(send ? "Email sent." : "Draft saved.", "success");
   } catch (err) {
     showToast(err.message, "error");
   }
+}
+
+// ---------- Mail generator (compose) ----------
+
+const genEl = (id) => document.getElementById(id);
+let genState = { generated: false, subject: "", body: "" };
+
+function fillSelect(select, options, selected) {
+  select.replaceChildren();
+  options.forEach((o) => {
+    const opt = document.createElement("option");
+    opt.value = o.value;
+    opt.textContent = o.label;
+    select.appendChild(opt);
+  });
+  if (selected) select.value = selected;
+}
+
+async function loadMailOptions() {
+  try {
+    const opts = await api.get("/api/mail/options");
+    state.languages = opts.languages;
+    fillSelect(genEl("gen-kind"), opts.kinds);
+    fillSelect(genEl("gen-language"), opts.languages, "ENGLISH");
+  } catch (err) {
+    // The generator still works in English with the built-in lists if the options cannot be loaded.
+    fillSelect(genEl("gen-kind"), [
+      { value: "INVITATION", label: "Invitation" },
+      { value: "REMINDER", label: "Reminder" },
+      { value: "MEETING_REQUEST", label: "Meeting request" },
+    ]);
+    fillSelect(genEl("gen-language"), state.languages, "ENGLISH");
+  }
+}
+
+function todayIso() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+}
+
+/** Clears the generator. `open` shows it (new messages) or folds it away (editing a draft). */
+function resetMailGenerator(open) {
+  ["gen-title", "gen-date", "gen-time", "gen-venue", "gen-recipient", "gen-points"].forEach((id) => {
+    genEl(id).value = "";
+  });
+  genEl("gen-date").min = todayIso();
+  genEl("gen-tone").value = "FORMAL";
+  genEl("gen-language").value = "ENGLISH";
+  genEl("gen-error").textContent = "";
+  genEl("gen-enhance").style.display = "none";
+  genEl("mailgen").open = !!open;
+  genState = { generated: false, subject: "", body: "" };
+}
+
+function setGenTone(tone) {
+  genEl("gen-tone").value = tone;
+}
+
+async function runMailGenerator() {
+  const errorEl = genEl("gen-error");
+  errorEl.textContent = "";
+  const title = genEl("gen-title").value.trim();
+  const date = genEl("gen-date").value;
+  if (!title) { errorEl.textContent = "Enter the event title."; return; }
+  if (!date) { errorEl.textContent = "Choose the event date."; return; }
+
+  const edited = genState.generated &&
+    (composeSubjectInput.value !== genState.subject || composeBodyInput.value !== genState.body);
+  const hasText = composeSubjectInput.value.trim() || composeBodyInput.value.trim();
+  if ((edited || (!genState.generated && hasText)) &&
+      !confirm("This will replace the subject and message you have written. Continue?")) {
+    return;
+  }
+
+  const btn = genEl("gen-btn");
+  btn.disabled = true;
+  btn.textContent = "Generating...";
+  try {
+    const mail = await api.post("/api/mail/generate", {
+      kind: genEl("gen-kind").value,
+      eventTitle: title,
+      date: date,
+      time: genEl("gen-time").value || null,
+      venue: genEl("gen-venue").value.trim() || null,
+      keyPoints: genEl("gen-points").value.trim() || null,
+      recipientName: genEl("gen-recipient").value.trim() || null,
+      tone: genEl("gen-tone").value,
+      language: genEl("gen-language").value,
+    });
+    composeSubjectInput.value = mail.subject;
+    composeBodyInput.value = mail.body;
+    genState = { generated: true, subject: mail.subject, body: mail.body };
+    genEl("gen-enhance").style.display = "flex";
+    composeBodyInput.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  } catch (err) {
+    errorEl.textContent = err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "✨ Generate mail";
+  }
+}
+
+function wireMailGenerator() {
+  genEl("gen-btn").addEventListener("click", runMailGenerator);
+  genEl("gen-enhance").querySelectorAll(".chip").forEach((chip) => {
+    chip.addEventListener("click", async () => {
+      setGenTone(chip.dataset.tone);
+      await runMailGenerator();
+    });
+  });
+  genEl("gen-language").addEventListener("change", async () => {
+    if (genState.generated) await runMailGenerator();
+  });
 }
 
 init();

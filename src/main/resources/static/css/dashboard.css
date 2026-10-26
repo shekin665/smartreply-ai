@@ -543,3 +543,23 @@
   flex: none;
   margin: 0;
 }
+
+/* ---------- Mail generator and enhance options ---------- */
+.mailgen { border: 1px solid var(--border, #d9dee7); border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; background: var(--surface-2, rgba(99,102,241,.06)); }
+.mailgen > summary { cursor: pointer; font-weight: 600; }
+.mailgen .muted { font-weight: 400; opacity: .7; font-size: .85em; }
+.mailgen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin-top: 12px; }
+.mailgen-grid .field { margin: 0; min-width: 0; }
+.mailgen-grid .field.wide { grid-column: 1 / -1; }
+.mailgen-grid label { display: block; font-size: .8rem; margin-bottom: 4px; }
+.mailgen-grid input, .mailgen-grid select, .mailgen-grid textarea { width: 100%; box-sizing: border-box; }
+.mailgen-actions { margin-top: 12px; }
+.mailgen-note { font-size: .78rem; opacity: .7; margin: 10px 0 2px; }
+.chip-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.chip-label { font-size: .85rem; opacity: .75; }
+.chip { border: 1px solid currentColor; background: transparent; color: inherit; border-radius: 999px; padding: 4px 12px; font-size: .82rem; cursor: pointer; opacity: .85; }
+.chip:hover { opacity: 1; background: rgba(99,102,241,.12); }
+.reply-options { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.reply-options .lang-select { flex: 0 0 auto; max-width: 100%; }
+.reply-options input { flex: 1 1 200px; min-width: 0; }
+@media (max-width: 560px) { .mailgen-grid { grid-template-columns: 1fr; } }

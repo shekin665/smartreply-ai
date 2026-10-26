@@ -17,6 +17,7 @@ public class Reply {
     private final LocalDateTime generatedAt;
     private boolean edited;
     private int estimatedSecondsSaved;
+    private Language language = Language.ENGLISH;
 
     public Reply(String id, String originalEmailId, Tone tone, String content,
                  LocalDateTime generatedAt, int estimatedSecondsSaved) {
@@ -27,6 +28,16 @@ public class Reply {
         this.generatedAt = generatedAt;
         this.edited = false;
         this.estimatedSecondsSaved = estimatedSecondsSaved;
+    }
+
+    public Reply(String id, String originalEmailId, Tone tone, String content,
+                 LocalDateTime generatedAt, int estimatedSecondsSaved, Language language) {
+        this(id, originalEmailId, tone, content, generatedAt, estimatedSecondsSaved);
+        this.language = language == null ? Language.ENGLISH : language;
+    }
+
+    public Language getLanguage() {
+        return language;
     }
 
     public String getId() {

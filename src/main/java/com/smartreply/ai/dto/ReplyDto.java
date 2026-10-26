@@ -1,5 +1,6 @@
 package com.smartreply.ai.dto;
 
+import com.smartreply.ai.model.Language;
 import com.smartreply.ai.model.Reply;
 import com.smartreply.ai.model.Tone;
 
@@ -14,9 +15,10 @@ public class ReplyDto {
     private final LocalDateTime generatedAt;
     private final boolean edited;
     private final int estimatedSecondsSaved;
+    private final Language language;
 
     private ReplyDto(String id, String originalEmailId, Tone tone, String content,
-                      LocalDateTime generatedAt, boolean edited, int estimatedSecondsSaved) {
+                      LocalDateTime generatedAt, boolean edited, int estimatedSecondsSaved, Language language) {
         this.id = id;
         this.originalEmailId = originalEmailId;
         this.tone = tone;
@@ -24,11 +26,12 @@ public class ReplyDto {
         this.generatedAt = generatedAt;
         this.edited = edited;
         this.estimatedSecondsSaved = estimatedSecondsSaved;
+        this.language = language;
     }
 
     public static ReplyDto from(Reply reply) {
         return new ReplyDto(reply.getId(), reply.getOriginalEmailId(), reply.getTone(), reply.getContent(),
-                reply.getGeneratedAt(), reply.isEdited(), reply.getEstimatedSecondsSaved());
+                reply.getGeneratedAt(), reply.isEdited(), reply.getEstimatedSecondsSaved(), reply.getLanguage());
     }
 
     public String getId() {
@@ -57,5 +60,9 @@ public class ReplyDto {
 
     public int getEstimatedSecondsSaved() {
         return estimatedSecondsSaved;
+    }
+
+    public Language getLanguage() {
+        return language;
     }
 }

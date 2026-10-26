@@ -104,6 +104,43 @@
 <div class="modal-overlay" id="compose-modal">
   <div class="modal-card">
     <h3 class="modal-title" id="compose-modal-title">New message</h3>
+    <!-- Mail generator. Kept OUTSIDE the form on purpose: pressing Enter in these fields must never send mail. -->
+    <details class="mailgen" id="mailgen" open>
+      <summary>✨ Mail generator <span class="muted">- fill in the event and get a ready mail</span></summary>
+      <div class="mailgen-grid">
+        <div class="field"><label for="gen-kind">Type of mail</label><select id="gen-kind"></select></div>
+        <div class="field"><label for="gen-language">Language</label><select id="gen-language"></select></div>
+        <div class="field wide"><label for="gen-title">Event title</label>
+          <input type="text" id="gen-title" maxlength="120" placeholder="e.g. Annual Tech Fest" /></div>
+        <div class="field"><label for="gen-date">Date</label><input type="date" id="gen-date" /></div>
+        <div class="field"><label for="gen-time">Time</label><input type="time" id="gen-time" /></div>
+        <div class="field wide"><label for="gen-venue">Venue (optional)</label>
+          <input type="text" id="gen-venue" maxlength="120" placeholder="e.g. Main Auditorium" /></div>
+        <div class="field"><label for="gen-recipient">Recipient's name (optional)</label>
+          <input type="text" id="gen-recipient" maxlength="60" placeholder="e.g. Meena" /></div>
+        <div class="field"><label for="gen-tone">Style</label>
+          <select id="gen-tone">
+            <option value="FORMAL">Formal</option>
+            <option value="FRIENDLY">Friendly</option>
+            <option value="CONCISE">Short</option>
+            <option value="DETAILED">Detailed</option>
+          </select></div>
+        <div class="field wide"><label for="gen-points">Key points (one per line, optional)</label>
+          <textarea id="gen-points" rows="3" maxlength="600" placeholder="Bring your ID card&#10;Lunch provided"></textarea></div>
+      </div>
+      <div class="field-error" id="gen-error"></div>
+      <div class="mailgen-actions">
+        <button type="button" class="btn btn-primary btn-sm" id="gen-btn">✨ Generate mail</button>
+      </div>
+      <div class="chip-row" id="gen-enhance" style="display:none;">
+        <span class="chip-label">Not quite right?</span>
+        <button type="button" class="chip" data-tone="FORMAL">More formal</button>
+        <button type="button" class="chip" data-tone="FRIENDLY">Friendlier</button>
+        <button type="button" class="chip" data-tone="CONCISE">Shorter</button>
+        <button type="button" class="chip" data-tone="DETAILED">More detailed</button>
+      </div>
+      <p class="mailgen-note">The wording is translated for you; names, titles and key points stay exactly as you typed them. Please check the mail before sending.</p>
+    </details>
     <form id="compose-form">
       <input type="hidden" id="compose-id" />
       <input type="hidden" id="compose-replied-to" />
