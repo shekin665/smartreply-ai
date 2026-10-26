@@ -245,6 +245,8 @@
 
 .reader-pane {
   grid-area: reader;
+  min-width: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   background: var(--bg);
   padding: 24px 28px 60px;
@@ -281,9 +283,19 @@
   border-radius: var(--radius);
   padding: 20px;
   white-space: pre-wrap;
+  /* Long unbroken text (tracking links, addresses) must wrap instead of running off the right edge. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  min-width: 0;
   font-size: 14px;
   line-height: 1.6;
   margin-bottom: 20px;
+}
+
+.reader-body a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .panel {

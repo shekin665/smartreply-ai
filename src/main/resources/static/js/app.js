@@ -457,11 +457,50 @@ function renderReader(email) {
 
   const body = document.createElement("div");
   body.className = "reader-body";
-  body.textContent = email.body || "";
+  appendBodyWithLinks(body, email.body || "");
 
   readerEl.append(header, body);
   readerEl.appendChild(buildKeywordPanel(email));
   readerEl.appendChild(buildReplyPanel(email));
+}
+
+// Long tracking links (LinkedIn, newsletters) bury the real message. Show each web address as a short
+// clickable label and keep the full address in the link. Only http/https links are made clickable and
+// everything is added as text nodes, so nothing in an email can inject HTML.
+const URL_PATTERN = /https?:\/\/[^\s<>"]+/g;
+
+function shortLinkLabel(url) {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, "");
+    const path = parsed.pathname === "/" ? "" : parsed.pathname;
+    const label = host + path;
+    return label.length > 48 ? label.slice(0, 47) + "…" : label;
+  } catch (err) {
+    return url.length > 48 ? url.slice(0, 47) + "…" : url;
+  }
+}
+
+function appendBodyWithLinks(container, text) {
+  let last = 0;
+  for (const match of text.matchAll(URL_PATTERN)) {
+    // Trailing punctuation belongs to the sentence, not to the address.
+    const url = match[0].replace(/[.,;:!?)\]]+$/, "");
+    if (match.index > last) {
+      container.appendChild(document.createTextNode(text.slice(last, match.index)));
+    }
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer nofollow";
+    link.title = url;
+    link.textContent = "🔗 " + shortLinkLabel(url);
+    container.appendChild(link);
+    last = match.index + url.length;
+  }
+  if (last < text.length) {
+    container.appendChild(document.createTextNode(text.slice(last)));
+  }
 }
 
 async function deleteEmail(emailId) {
