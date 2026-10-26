@@ -413,3 +413,121 @@
     grid-template-columns: 180px 280px 1fr;
   }
 }
+
+/* ---------- Priority keywords ---------- */
+.priority-panel {
+  margin-top: 18px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-alt);
+}
+
+.priority-title {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.priority-hint {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.priority-form {
+  display: flex;
+  gap: 6px;
+}
+
+.priority-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.priority-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.priority-chips:empty {
+  display: none;
+}
+
+.keyword-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px 2px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border: 1px solid var(--primary);
+  border-radius: 999px;
+}
+
+.keyword-chip button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.keyword-chip button:hover,
+.keyword-chip button:focus-visible {
+  background: var(--primary);
+  color: #fff;
+}
+
+.priority-only {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+/* An email row that matched a keyword */
+.email-item.priority {
+  border-left: 4px solid var(--warning);
+  background: color-mix(in srgb, var(--warning) 8%, transparent);
+}
+
+.email-item.priority.selected {
+  background: var(--primary-soft);
+}
+
+.priority-tag {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--warning);
+  border: 1px solid var(--warning);
+  border-radius: 999px;
+}
+
+.priority-only input {
+  width: auto;
+  flex: none;
+  margin: 0;
+}

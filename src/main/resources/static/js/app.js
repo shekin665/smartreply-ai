@@ -11,6 +11,9 @@ const state = {
   selectedEmail: null,
   currentReply: null,
   selectedTone: "PROFESSIONAL",
+  keywords: [],
+  priorityOnly: false,
+  userEmail: "",
 };
 
 const listEl = document.getElementById("email-list");
@@ -48,7 +51,117 @@ async function init() {
   wireLogout();
   wireResetDemo();
   wireSyncInbox();
+  wirePriorityKeywords();
+  await loadPriorityKeywords();
   await Promise.all([loadStats(), loadList()]);
+}
+
+// ---------- Priority keywords ----------
+// The server keeps each signed-in user's keywords for the length of their session (there is no
+// database). A copy is also kept in this browser, per Google account, and restored on the next
+// visit so the list is not lost when the user signs out or the server restarts.
+
+function keywordStorageKey() {
+  return "smartreply.priorityKeywords." + (state.userEmail || "unknown");
+}
+
+function readSavedKeywords() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(keywordStorageKey()) || "[]");
+    return Array.isArray(saved) ? saved.filter((k) => typeof k === "string") : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+function saveKeywordsLocally(keywords) {
+  try {
+    localStorage.setItem(keywordStorageKey(), JSON.stringify(keywords));
+  } catch (err) {
+    // Storage can be blocked (private window). Keywords still work for this session.
+  }
+}
+
+async function loadPriorityKeywords() {
+  try {
+    const me = await api.get("/api/auth/me");
+    state.userEmail = me.email || "";
+    let result = await api.get("/api/priority-keywords");
+    const saved = readSavedKeywords();
+    if (result.keywords.length === 0 && saved.length > 0) {
+      result = await api.put("/api/priority-keywords", { keywords: saved });
+    }
+    setKeywords(result.keywords);
+  } catch (err) {
+    showToast(err.message, "error");
+  }
+}
+
+function setKeywords(keywords) {
+  state.keywords = keywords;
+  saveKeywordsLocally(keywords);
+  renderKeywordChips();
+}
+
+function renderKeywordChips() {
+  const chips = document.getElementById("priority-chips");
+  chips.innerHTML = "";
+  state.keywords.forEach((keyword) => {
+    const chip = document.createElement("span");
+    chip.className = "keyword-chip";
+    chip.textContent = keyword;
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "×";
+    remove.title = `Remove "${keyword}"`;
+    remove.setAttribute("aria-label", `Remove keyword ${keyword}`);
+    remove.addEventListener("click", () => removeKeyword(keyword));
+    chip.appendChild(remove);
+    chips.appendChild(chip);
+  });
+}
+
+async function refreshAfterKeywordChange() {
+  await Promise.all([loadStats(), loadList()]);
+}
+
+async function addKeyword(raw) {
+  try {
+    const result = await api.post("/api/priority-keywords", { keyword: raw });
+    setKeywords(result.keywords);
+    await refreshAfterKeywordChange();
+    return true;
+  } catch (err) {
+    showToast(err.message, "error");
+    return false;
+  }
+}
+
+async function removeKeyword(keyword) {
+  try {
+    const result = await api.delete("/api/priority-keywords?keyword=" + encodeURIComponent(keyword));
+    setKeywords(result.keywords);
+    await refreshAfterKeywordChange();
+  } catch (err) {
+    showToast(err.message, "error");
+  }
+}
+
+function wirePriorityKeywords() {
+  const input = document.getElementById("priority-input");
+  document.getElementById("priority-form").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const value = input.value.trim();
+    if (!value) return;
+    if (await addKeyword(value)) {
+      input.value = "";
+      input.focus();
+    }
+  });
+  document.getElementById("priority-only").addEventListener("change", (ev) => {
+    state.priorityOnly = ev.target.checked;
+    loadList();
+  });
 }
 
 function wireSyncInbox() {
@@ -134,6 +247,7 @@ async function loadStats() {
   try {
     const stats = await api.get("/api/emails/stats");
     document.getElementById("stat-unread").textContent = stats.unreadCount;
+    document.getElementById("stat-priority").textContent = stats.priorityCount;
     document.getElementById("stat-replies").textContent = stats.repliesGenerated;
     document.getElementById("stat-time").textContent = stats.timeSavedMinutes + "m";
     document.getElementById("count-INBOX").textContent = stats.inboxCount;
@@ -153,6 +267,7 @@ async function loadList() {
   try {
     const params = new URLSearchParams({ folder: state.folder });
     if (state.search) params.set("search", state.search);
+    if (state.priorityOnly) params.set("priorityOnly", "true");
     const emails = await api.get("/api/emails?" + params.toString());
     state.emails = emails;
     renderList(emails);
@@ -165,7 +280,10 @@ async function loadList() {
 function renderList(emails) {
   listEl.innerHTML = "";
   if (emails.length === 0) {
-    listEl.appendChild(emptyState("📭", "No emails in this folder" + (state.search ? " matching your search" : "")));
+    const emptyText = state.priorityOnly
+      ? "No emails match your priority keywords"
+      : "No emails in this folder" + (state.search ? " matching your search" : "");
+    listEl.appendChild(emptyState("📭", emptyText));
     return;
   }
   emails.forEach((email) => listEl.appendChild(renderListItem(email)));
@@ -173,7 +291,9 @@ function renderList(emails) {
 
 function renderListItem(email) {
   const item = document.createElement("div");
-  item.className = "email-item" + (email.read ? "" : " unread") + (email.id === state.selectedEmailId ? " selected" : "");
+  const matched = email.matchedKeywords || [];
+  item.className = "email-item" + (email.read ? "" : " unread") + (matched.length ? " priority" : "")
+    + (email.id === state.selectedEmailId ? " selected" : "");
   item.dataset.id = email.id;
 
   const main = document.createElement("div");
@@ -206,6 +326,13 @@ function renderListItem(email) {
   snippet.textContent = email.snippet || "";
 
   main.append(row1, subject, snippet);
+  if (matched.length) {
+    const tag = document.createElement("span");
+    tag.className = "priority-tag";
+    tag.textContent = "★ Priority: " + matched.join(", ");
+    tag.title = "This email mentions your priority keyword" + (matched.length > 1 ? "s" : "");
+    main.appendChild(tag);
+  }
 
   const star = document.createElement("span");
   star.className = "email-item-star" + (email.starred ? " starred" : "");

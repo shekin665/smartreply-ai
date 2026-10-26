@@ -412,3 +412,21 @@ java -version && mvn -version
 ```
 To make this automatic in every new terminal (instead of re-running `source` each time), add
 `source ~/tools/env.sh` to the end of your `~/.zshrc` (or `~/.bashrc`).
+
+---
+
+## Priority keywords (personalised inbox)
+
+Each signed-in user can save up to 20 personal keywords or short phrases (for example `exam`,
+`invoice`, `purchase order`, a professor's name) in the **Priority keywords** panel in the sidebar.
+
+- An email that mentions a keyword in its subject, body or sender is tagged **★ Priority** and listed
+  first in the Inbox. Emails matching more keywords come first; the rest stay newest-first.
+- Matching ignores upper/lower case and uses whole words, so `exam` matches "Exam schedule" but not
+  "example". A phrase matches even if the words are separated by extra spaces or a line break.
+- **Show matching mail only** filters the Inbox to emails that matched. The top bar shows how many
+  Inbox emails match.
+- Code: `service/PriorityKeywordService` (matching and ordering, session-scoped so users never see each
+  other's keywords), `controller/PriorityKeywordController` (`/api/priority-keywords`), and
+  `PriorityKeywordServiceTest`. The list is also saved in the browser (per Google account) and restored
+  on the next visit, because the app has no database.

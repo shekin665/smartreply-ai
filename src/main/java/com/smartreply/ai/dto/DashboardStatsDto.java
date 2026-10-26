@@ -9,9 +9,11 @@ public class DashboardStatsDto {
     private final long spamCount;
     private final int repliesGenerated;
     private final int timeSavedMinutes;
+    private final long priorityCount;
 
     public DashboardStatsDto(long inboxCount, long unreadCount, long sentCount, long draftsCount,
-                              long spamCount, int repliesGenerated, int timeSavedMinutes) {
+                              long spamCount, int repliesGenerated, int timeSavedMinutes,
+                              long priorityCount) {
         this.inboxCount = inboxCount;
         this.unreadCount = unreadCount;
         this.sentCount = sentCount;
@@ -19,6 +21,7 @@ public class DashboardStatsDto {
         this.spamCount = spamCount;
         this.repliesGenerated = repliesGenerated;
         this.timeSavedMinutes = timeSavedMinutes;
+        this.priorityCount = priorityCount;
     }
 
     public long getInboxCount() {
@@ -47,5 +50,10 @@ public class DashboardStatsDto {
 
     public int getTimeSavedMinutes() {
         return timeSavedMinutes;
+    }
+
+    /** Inbox emails that mention one of the user's priority keywords. */
+    public long getPriorityCount() {
+        return priorityCount;
     }
 }

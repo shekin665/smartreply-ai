@@ -11,6 +11,7 @@ import com.smartreply.ai.model.KeywordAnalysis;
 import com.smartreply.ai.model.SentEmail;
 import com.smartreply.ai.service.EmailService;
 import com.smartreply.ai.service.KeywordService;
+import com.smartreply.ai.service.PriorityKeywordService;
 import com.smartreply.ai.service.ReplyService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,17 +36,32 @@ public class EmailController {
     private final EmailService emailService;
     private final KeywordService keywordService;
     private final ReplyService replyService;
+    private final PriorityKeywordService priorityKeywordService;
 
-    public EmailController(EmailService emailService, KeywordService keywordService, ReplyService replyService) {
+    public EmailController(EmailService emailService, KeywordService keywordService, ReplyService replyService,
+                            PriorityKeywordService priorityKeywordService) {
         this.emailService = emailService;
         this.keywordService = keywordService;
         this.replyService = replyService;
+        this.priorityKeywordService = priorityKeywordService;
     }
 
+    /**
+     * Lists a folder. Emails that contain one of the user's priority keywords carry the matched
+     * keywords and, in the Inbox, are listed first. With {@code priorityOnly=true} only those emails are returned.
+     */
     @GetMapping
-    public List<EmailSummaryDto> list(@RequestParam Folder folder, @RequestParam(required = false) String search) {
+    public List<EmailSummaryDto> list(@RequestParam Folder folder,
+                                       @RequestParam(required = false) String search,
+                                       @RequestParam(defaultValue = "false") boolean priorityOnly) {
         List<Email> emails = emailService.search(folder, search);
-        return emails.stream().map(EmailSummaryDto::from).toList();
+        if (folder == Folder.INBOX) {
+            emails = priorityKeywordService.prioritise(emails);
+        }
+        return emails.stream()
+                .map(e -> EmailSummaryDto.from(e, e.isReceivedEmail() ? priorityKeywordService.matches(e) : List.<String>of()))
+                .filter(dto -> !priorityOnly || !dto.getMatchedKeywords().isEmpty())
+                .toList();
     }
 
     @GetMapping("/{id}")
@@ -132,7 +148,10 @@ public class EmailController {
                 emailService.getByFolder(Folder.DRAFTS).size(),
                 emailService.getByFolder(Folder.SPAM).size(),
                 replyService.getTotalRepliesGenerated(),
-                replyService.getTotalSecondsSaved() / 60
+                replyService.getTotalSecondsSaved() / 60,
+                emailService.getByFolder(Folder.INBOX).stream()
+                        .filter(e -> !priorityKeywordService.matches(e).isEmpty())
+                        .count()
         );
     }
 
