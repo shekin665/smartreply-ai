@@ -52,6 +52,6 @@ public class MailGeneratorController {
         return Map.of(
                 "languages", Arrays.stream(Language.values()).map(l -> new Option(l.name(), l.getLabel())).toList(),
                 "kinds", Arrays.stream(MailKind.values()).map(k -> new Option(k.name(), k.getLabel())).toList(),
-                "assistAvailable", textAssistService.isConfigured());
+                "assistAvailable", true);
     }
 }

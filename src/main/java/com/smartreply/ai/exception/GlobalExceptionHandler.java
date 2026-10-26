@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TextAssistException.class)
     public ResponseEntity<ErrorResponse> handleTextAssist(TextAssistException ex) {
-        return build(ex.isNotConfigured() ? HttpStatus.SERVICE_UNAVAILABLE : HttpStatus.BAD_GATEWAY, ex.getMessage());
+        return build(HttpStatus.BAD_GATEWAY, ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

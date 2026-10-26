@@ -1024,16 +1024,14 @@ function buildAssistBar(getText, setText) {
 
   const label = document.createElement("span");
   label.className = "chip-label";
-  label.textContent = "✨ Improve my own text:";
+  label.textContent = "✨ Your own text:";
 
   const style = document.createElement("select");
   style.setAttribute("aria-label", "Style");
   fillSelect(style, [
-    { value: "", label: "Keep my style (fix mistakes)" },
-    { value: "FORMAL", label: "More formal" },
-    { value: "FRIENDLY", label: "Friendlier" },
-    { value: "CONCISE", label: "Shorter" },
-    { value: "DETAILED", label: "More detailed" },
+    { value: "", label: "Fix mistakes only" },
+    { value: "FORMAL", label: "Fix + more formal" },
+    { value: "CONCISE", label: "Fix + shorter" },
   ]);
 
   const lang = document.createElement("select");
@@ -1056,7 +1054,6 @@ function buildAssistBar(getText, setText) {
   go.addEventListener("click", async () => {
     const text = getText();
     if (!text.trim()) { showToast("Type or generate some text first.", "error"); return; }
-    if (!style.value && !lang.value) { showToast("Pick a style or a language first.", "error"); return; }
     go.disabled = true;
     go.textContent = "Working...";
     try {
