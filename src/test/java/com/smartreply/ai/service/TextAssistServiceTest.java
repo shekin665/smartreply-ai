@@ -53,6 +53,8 @@ class TextAssistServiceTest {
         assertThrows(TextAssistException.class,
                 () -> TextAssistService.parseTranslation("MYMEMORY WARNING: YOU USED ALL AVAILABLE FREE TRANSLATIONS FOR TODAY."));
         assertTrue(TextAssistService.looksUntranslatable("https://x.com/a"));
-        assertFalse(TextAssistService.looksUntranslatable("See https://x.com/a"));
+        assertTrue(TextAssistService.looksUntranslatable("See https://x.com/a"));
+        assertTrue(TextAssistService.looksUntranslatable("-----"));
+        assertFalse(TextAssistService.looksUntranslatable("See you tomorrow"));
     }
 }

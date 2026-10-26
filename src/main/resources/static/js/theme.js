@@ -5,19 +5,20 @@
 
   function applyTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem(THEME_KEY, theme);
+    try { localStorage.setItem(THEME_KEY, theme); } catch (e) { /* private mode */ }
     document.querySelectorAll("[data-theme-icon]").forEach((el) => {
       el.textContent = theme === "dark" ? "☀️" : "🌙";
     });
   }
 
   function initTheme() {
-    const saved = localStorage.getItem(THEME_KEY) || "light";
+    let saved = "dark";
+    try { saved = localStorage.getItem(THEME_KEY) || "dark"; } catch (e) { /* private mode */ }
     applyTheme(saved);
   }
 
   function toggleTheme() {
-    const current = document.documentElement.getAttribute("data-theme") || "light";
+    const current = document.documentElement.getAttribute("data-theme") || "dark";
     applyTheme(current === "dark" ? "light" : "dark");
   }
 

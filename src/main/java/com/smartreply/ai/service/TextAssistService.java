@@ -50,6 +50,17 @@ public class TextAssistService {
         return result;
     }
 
+    /** Translates text only (no clean-up), for reading incoming and outgoing mail in another language. */
+    public String translateOnly(String text, Language target) {
+        if (text == null || text.isBlank()) {
+            throw new IllegalArgumentException("There is nothing to translate.");
+        }
+        if (target == null) {
+            throw new IllegalArgumentException("Choose a language.");
+        }
+        return translate(text.replace("\r\n", "\n"), target);
+    }
+
     /** Translates line by line so the layout (greeting, paragraphs, sign-off) is kept. */
     String translate(String text, Language target) {
         List<String> chunks = new ArrayList<>();
@@ -107,9 +118,14 @@ public class TextAssistService {
                 .replace("&lt;", "<").replace("&gt;", ">");
     }
 
-    /** Lines that are only a link or e-mail address are left as they are. */
+    /**
+     * Lines with a web link are left as they are (a translation service can break the link), and so are
+     * bare e-mail addresses and lines with no letters in them.
+     */
     static boolean looksUntranslatable(String line) {
         String t = line.strip();
-        return (t.startsWith("http://") || t.startsWith("https://") || t.matches("\\S+@\\S+\\.\\S+")) && !t.contains(" ");
+        if (t.contains("://") || t.startsWith("www.")) return true;
+        if (t.matches("\\S+@\\S+\\.\\S+")) return true;
+        return t.chars().noneMatch(Character::isLetter);
     }
 }

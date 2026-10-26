@@ -463,9 +463,76 @@ function renderReader(email) {
   body.className = "reader-body";
   appendBodyWithLinks(body, email.body || "");
 
-  readerEl.append(header, body);
+  readerEl.append(header, buildTranslateBar(email, body), body);
   readerEl.appendChild(buildKeywordPanel(email));
   readerEl.appendChild(buildReplyPanel(email));
+}
+
+/** Translate the open mail (incoming or sent) into another language, with a way back to the original. */
+function buildTranslateBar(email, bodyEl) {
+  const bar = document.createElement("div");
+  bar.className = "translate-bar";
+
+  const label = document.createElement("span");
+  label.className = "chip-label";
+  label.textContent = "🌐 Read in:";
+
+  const lang = document.createElement("select");
+  lang.setAttribute("aria-label", "Translate this mail to");
+  fillSelect(lang, state.languages.filter((l) => l.value !== "ENGLISH").concat(
+    state.languages.filter((l) => l.value === "ENGLISH")), "TAMIL");
+
+  const go = document.createElement("button");
+  go.type = "button";
+  go.className = "btn btn-secondary btn-sm";
+  go.textContent = "Translate";
+
+  const original = document.createElement("button");
+  original.type = "button";
+  original.className = "btn btn-ghost btn-sm";
+  original.textContent = "Show original";
+  original.style.display = "none";
+
+  const note = document.createElement("span");
+  note.className = "translate-note";
+
+  const subjectNode = () => readerEl.querySelector(".reader-subject");
+  const originalSubject = email.subject || "(no subject)";
+
+  go.addEventListener("click", async () => {
+    const text = (email.body || "").trim();
+    if (!text) { showToast("This mail has no text to translate.", "error"); return; }
+    go.disabled = true;
+    go.textContent = "Translating...";
+    try {
+      const shortened = text.length > 3500;
+      const payload = (email.subject || "") + "\n\n" + text.slice(0, 3400);
+      const res = await api.post("/api/mail/translate", { text: payload, language: lang.value });
+      const split = res.text.indexOf("\n\n");
+      const translatedSubject = split > -1 ? res.text.slice(0, split) : "";
+      const translatedBody = split > -1 ? res.text.slice(split + 2) : res.text;
+      bodyEl.replaceChildren();
+      appendBodyWithLinks(bodyEl, translatedBody);
+      if (subjectNode() && translatedSubject) subjectNode().firstChild.textContent = translatedSubject;
+      note.textContent = shortened ? "Machine translation of the first part of the mail." : "Machine translation - may be inexact.";
+      original.style.display = "inline-flex";
+    } catch (err) {
+      showToast(err.message, "error");
+    } finally {
+      go.disabled = false;
+      go.textContent = "Translate";
+    }
+  });
+  original.addEventListener("click", () => {
+    bodyEl.replaceChildren();
+    appendBodyWithLinks(bodyEl, email.body || "");
+    if (subjectNode()) subjectNode().firstChild.textContent = originalSubject;
+    note.textContent = "";
+    original.style.display = "none";
+  });
+
+  bar.append(label, lang, go, original, note);
+  return bar;
 }
 
 // Long tracking links (LinkedIn, newsletters) bury the real message. Show each web address as a short

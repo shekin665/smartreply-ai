@@ -47,6 +47,12 @@ public class MailGeneratorController {
         return Map.of("text", textAssistService.assist(request.getText(), request.getLanguage(), request.getStyle()));
     }
 
+    /** Translates a mail (subject and body) for reading, without changing the wording otherwise. */
+    @PostMapping("/translate")
+    public Map<String, String> translate(@Valid @RequestBody TextAssistRequest request) {
+        return Map.of("text", textAssistService.translateOnly(request.getText(), request.getLanguage()));
+    }
+
     @GetMapping("/options")
     public Map<String, Object> options() {
         return Map.of(

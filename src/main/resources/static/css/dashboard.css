@@ -566,3 +566,9 @@
 
 .assist-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
 .assist-bar select { max-width: 100%; }
+
+.reader-body { font-weight: 500; line-height: 1.7; }
+.reader-subject { font-weight: 700; }
+.translate-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 12px; }
+.translate-note { font-size: 12px; color: var(--text-muted); }
+.translate-bar select, .assist-bar select, .reply-options select { width: auto; min-width: 150px; }
